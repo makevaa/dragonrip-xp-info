@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Dragonrip XP Info
 // @namespace    http://tampermonkey.net/
-// @version      1.0.0
+// @version      1.0.1
 // @description  View skill xp data on character page in Dragonrip
 // @author       Kronos1
 // @match         *://*.dragonrip.com/*
@@ -20,9 +20,12 @@
         removeVanillaElements:true, // Remove game's vanilla skill info on character page
     }
     
-
+    //        
 
     const mainCss = `
+
+
+
         .dragonrip-xp-info-box {
             xborder:1px solid grey;
             width:100%;
@@ -31,19 +34,28 @@
             flex-direction:column;
             align-items: start;
             justify-content: start;
-            padding:5px;
+            padding:0px 3px;
+
+            --light-blue: #679fff;
+            --blue: #2259b7ff;
+            --purple: #6f6fffff;
+            --light-lime: #00ff80ff;
         }
 
         .dragonrip-xp-info-box > .row {
             xborder:1px solid grey;
             width:100%;
             display:flex;
-            align-items: start;
+            align-items: center;
             justify-content: start;
         }
 
         .dragonrip-xp-info-box > .row > img.skill-image {
-            filter: drop-shadow(0px 0px 2px rgba(111, 111, 255, 1) );
+            padding:3px;
+            xborder-radius:100%;
+            xborder: 2px solid var(--light-blue);
+            xbackground-color: white;
+            filter: drop-shadow( 0px 0px 2px var(--light-blue) );
         }
 
         .dragonrip-xp-info-box > .row > .label {
@@ -80,9 +92,7 @@
 
         .dragonrip-xp-info-box > .row > .skill-level {
             margin:0px 5px 0px 5px;
-            color:rgb(0, 255, 128);
-            color:rgb(111, 111, 255);
-            xcolor:rgb(111, 145, 255);
+            color: var(--light-blue);
             text-shadow: 
                 0px 0px 3px black,
                 0px 0px 3px black,
@@ -95,52 +105,54 @@
         } 
 
         /* XP bar container */
-        .dragonrip-xp-info-box > .xp-bar-cont {
-            border:1px solid rgb(41, 41, 41);
+        .dragonrip-xp-info-box > .xp-bar-cont,
+        .dragonrip-combat-info-box > .xp-bar-cont {
+            border: 1px solid rgba(255, 255, 255, 0.3);
             width:100%;
             height:7px;
             position:relative;
             margin:5px 0px 4px 0px;
-            xbox-shadow: inset 0px 0px 2px 2px rgba(0, 0, 0, 0.9), 5px 5px 5px 5px rgba(0.9);
-            xbox-shadow: inset 5px 5px 5px 5px red;
-            background-color:black;
+        }
+
+        .dragonrip-combat-info-box > .xp-bar-cont {
+            height:15px;
+            width:70%;
+            margin:auto;
+            box-shadow:3px 3px 3px 0px rgba(0, 0, 0, 0.7);
         }
 
         /* XP bar */
-        .dragonrip-xp-info-box > .xp-bar-cont > .bar-outer {
+        .dragonrip-xp-info-box > .xp-bar-cont > .bar-outer,
+        .dragonrip-combat-info-box > .xp-bar-cont > .bar-outer {
             width:100%;
             height:100%;
-            background-color:black;
+            background-color: rgba(255, 255, 255, 0.05);
             position:relative;
         }
 
-        .dragonrip-xp-info-box > .xp-bar-cont > .bar-outer:after{
+        .dragonrip-xp-info-box > .xp-bar-cont > .bar-outer:after, 
+        .dragonrip-combat-info-box > .xp-bar-cont > .bar-outer:after {
             content: '';
             position: absolute;
             top: 0px;
             left: 0px;
             width: calc(100% - 0px);
             height: 10%;
-            xbackground: linear-gradient(rgba(255,255,255,0.2), rgba(255,255,255,0));
         }
    
         /* XP bar filled interior */
-        .dragonrip-xp-info-box > .xp-bar-cont > .bar-outer > .bar-inner {
+        .dragonrip-xp-info-box > .xp-bar-cont > .bar-outer > .bar-inner,
+        .dragonrip-combat-info-box > .xp-bar-cont > .bar-outer > .bar-inner {
             height:100%;
             background-color:red;
             position:relative;
             text-align:left;
-
-            xbackground-image: url('https://i.imgur.com/VeK3PfN.jpeg');
-            background-color: rgb(113, 64, 0);
-            background-color: rgb(0, 107, 54);
-            background-color:rgb(51, 51, 172);
- 
-            xborder-right:2px solid rgba(78, 255, 131, 0.9);
             filter:saturate(2);
+            background-color: var(--blue);
         }
 
-        .dragonrip-xp-info-box > .xp-bar-cont > .bar-outer:after {
+        .dragonrip-xp-info-box > .xp-bar-cont > .bar-outer:after,
+        .dragonrip-combat-info-box > .xp-bar-cont > .bar-outer:after {
             content: '';
             position: absolute;
             width:100%;
@@ -150,15 +162,17 @@
         }
 
          /* XP bar progress percent inside the bar */
-        .dragonrip-xp-info-box > .xp-bar-cont > .bar-outer > .progress {
-            position:absolute;
-            height:100%;
-            z-index:2;
-            font-size:0.8em;
+        .dragonrip-xp-info-box > .xp-bar-cont > .bar-outer > .progress,
+        .dragonrip-combat-info-box > .xp-bar-cont > .bar-outer > .progress {
+            position: absolute;
+            height: 100%;
+            z-index: 2;
+            font-size: 0.9em;
             padding: 0px 0px 0px 5px;
-            display:flex;
+            display: flex;
             align-items: center;
             justify-content: center;
+            font-family: consolas, monospace;
             text-shadow: 
                 0px 0px 3px black,
                 0px 0px 3px black,
@@ -170,6 +184,39 @@
             ;
         }
 
+
+        .dragonrip-combat-info-box {
+        
+        }
+
+        .dragonrip-combat-info-box > .xp-info {
+            display:flex;
+            align-items: start;
+            justify-content: center;
+            margin:5px;
+            font-size:0.9em;
+        }
+
+        .dragonrip-combat-info-box > .xp-info > .box {
+            border-radius:3px;
+            display:flex;
+            align-items: start;
+            justify-content: start;
+            padding:5px;
+            margin:5px 5px 0px 5px;
+            background-color:rgba(0,0,0,0.5);
+            border: 2px solid rgb(60, 60, 60);
+            box-shadow:5px 5px 5px 0px rgba(0, 0, 0, 0.5);
+        }
+
+        .dragonrip-combat-info-box > .xp-info > .box > .label {
+            color:grey;
+            padding-right:5px;
+        }
+
+        .dragonrip-combat-info-box > .xp-info > .box > .num {
+            xcolor: grey;
+        }
     }
     `;
 
@@ -282,7 +329,7 @@
 
         const progressNum = document.createElement('div');
         progressNum.classList.add('progress');
-        progressNum.innerText = progress;
+        progressNum.innerText = `${progress.replace('%', ' %')}`;
         //progressNum.style.left = progress;
 
         barOuter.append(progressNum);
@@ -333,6 +380,8 @@
             const skillLevel = childNodes[1].nodeValue.trim();
             const totalXp = calcTotalXp(skillLevel, xpLeft, skillName);
 
+            const progress = barPercent.replace('%', '');
+
             //log(totalXp)
 
             const skill = {
@@ -341,7 +390,7 @@
                 imageUrl: skillImageUrl,
                 xpLeft: xpLeft,
                 totalXp: totalXp,
-                progress: barPercent,
+                progress: progress,
 
           
             }
@@ -369,7 +418,7 @@
             image.src = skill.imageUrl;
             skillNameElem.prepend(image);
 
-            const barElem = createXpBar(skill.progress);
+            const barElem = createXpBar(`${skill.progress}%`);
 
             info.append(skillNameElem);
             info.append(barElem);
@@ -385,6 +434,88 @@
 
             skillElem.append(info);
         }
+    }
+
+
+    const combatXpBar = () => {
+        const tables = document.querySelectorAll('body > .veik > table#pirki');
+        //log(tables)
+
+        // Get combat level from the element in the character page
+        const combatLevel = parseInt(tables[0].querySelectorAll('tbody > tr > td')[1].querySelector('span > b').innerText);
+        
+
+        const combatXpElem = tables[1];
+        combatXpElem.style.border = '1px solid lime';
+
+        let xpLeft = tables[1].querySelector('tbody > tr > td > div.levelio').getAttribute('title');
+        xpLeft = xpLeft.replace('XP left: ', '');
+        xpLeft = parseInt(xpLeft); 
+
+        let progress = tables[1].querySelector('tbody > tr > td > div.levelio > div.levelio2').style.width;
+
+        const totalXp = calcTotalXp(combatLevel, xpLeft, 'Combat') 
+
+
+       
+
+        const data = {
+            level: combatLevel,
+            xpLeft: xpLeft,
+            totalXp: totalXp,
+            progress: progress
+        }
+
+        log(`[data object] level: ${data.level}, xpLeft: ${data.xpLeft}, totalXp: ${data.totalXp}, progress: ${data.progress} %`);
+
+
+
+        const combatInfo = document.createElement('div');
+        combatInfo.classList.add('dragonrip-combat-info-box');
+
+        const barElem = createXpBar(`${data.progress}`);
+
+        const xpInfo = document.createElement('div');
+        xpInfo.classList.add('xp-info');
+
+        // Create box for total xp
+        const totalXpCont = document.createElement('div');
+        totalXpCont.classList.add('box');
+        totalXpCont.classList.add('total-xp');
+
+        const totalXpLabel = document.createElement('div');
+        totalXpLabel.classList.add('label');
+        totalXpLabel.innerText = 'Combat XP: ';
+        totalXpCont.append(totalXpLabel);
+
+        const totalXpNum = document.createElement('div');
+        totalXpNum.classList.add('num');
+        totalXpNum.innerText = numberWithCommas(data.totalXp);
+        totalXpCont.append(totalXpNum);
+
+        
+        // Create box for XP to level
+        const xpToLevelCont = document.createElement('div');
+        xpToLevelCont.classList.add('box');
+        xpToLevelCont.classList.add('xp-to-level');
+
+        const xpToLevelLabel = document.createElement('div');
+        xpToLevelLabel.classList.add('label');
+        xpToLevelLabel.innerText = 'XP to level: ';
+        xpToLevelCont.append(xpToLevelLabel);
+
+        const xpToLevelNum = document.createElement('div');
+        xpToLevelNum.classList.add('num');
+        xpToLevelNum.innerText = numberWithCommas(data.xpLeft);
+        xpToLevelCont.append(xpToLevelNum);
+
+        xpInfo.append(totalXpCont);
+        xpInfo.append(xpToLevelCont);
+        combatInfo.append(xpInfo);
+        combatInfo.append(barElem);
+        combatXpElem.after(combatInfo);
+
+        combatXpElem.remove();
     }
     
 
@@ -415,6 +546,7 @@
                     const skillElems = getSkillElems();
 
                     createElems(skillElems);
+                    combatXpBar();
                 }
               
                
