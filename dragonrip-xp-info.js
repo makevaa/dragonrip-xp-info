@@ -1,9 +1,9 @@
 // ==UserScript==
 // @name         Dragonrip XP Info
 // @namespace    http://tampermonkey.net/
-// @version      1.0.1
+// @version      1.0.11
 // @description  View skill xp data on character page in Dragonrip
-// @author       Kronos1
+// @author       paxu
 // @match         *://*.dragonrip.com/*
 // @icon         https://i.imgur.com/Vn0ku7D.png
 // @grant        none
@@ -23,8 +23,6 @@
     //        
 
     const mainCss = `
-
-
 
         .dragonrip-xp-info-box {
             xborder:1px solid grey;
@@ -144,11 +142,12 @@
         .dragonrip-xp-info-box > .xp-bar-cont > .bar-outer > .bar-inner,
         .dragonrip-combat-info-box > .xp-bar-cont > .bar-outer > .bar-inner {
             height:100%;
-            background-color:red;
+            xbackground-color:red;
             position:relative;
             text-align:left;
             filter:saturate(2);
-            background-color: var(--blue);
+            background-color: var(--blue)!important;
+            xbackground-color:lime;
         }
 
         .dragonrip-xp-info-box > .xp-bar-cont > .bar-outer:after,
@@ -325,7 +324,7 @@
 
         const barInner = document.createElement('div');
         barInner.classList.add('bar-inner');
-        barInner.style.width = progress;
+        barInner.style.width = `${progress}`;
 
         const progressNum = document.createElement('div');
         progressNum.classList.add('progress');
@@ -453,6 +452,7 @@
         xpLeft = parseInt(xpLeft); 
 
         let progress = tables[1].querySelector('tbody > tr > td > div.levelio > div.levelio2').style.width;
+        log(`combat xp bar progress: ${progress}`)
 
         const totalXp = calcTotalXp(combatLevel, xpLeft, 'Combat') 
 
