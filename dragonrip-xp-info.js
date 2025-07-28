@@ -35,7 +35,7 @@
             padding:0px 3px;
 
             --light-blue: #679fff;
-            --blue: #2259b7ff;
+            --blue: #2259b7;
             --purple: #6f6fffff;
             --light-lime: #00ff80ff;
         }
@@ -142,13 +142,14 @@
         .dragonrip-xp-info-box > .xp-bar-cont > .bar-outer > .bar-inner,
         .dragonrip-combat-info-box > .xp-bar-cont > .bar-outer > .bar-inner {
             height:100%;
-            xbackground-color:red;
             position:relative;
             text-align:left;
             filter:saturate(2);
             background-color: var(--blue)!important;
-            xbackground-color:lime;
+            background-color: #2259b7!important;
         }
+
+
 
         .dragonrip-xp-info-box > .xp-bar-cont > .bar-outer:after,
         .dragonrip-combat-info-box > .xp-bar-cont > .bar-outer:after {
@@ -185,7 +186,8 @@
 
 
         .dragonrip-combat-info-box {
-        
+            xborder:1px solid grey;
+            font-family: consolas, monospace;
         }
 
         .dragonrip-combat-info-box > .xp-info {
@@ -445,14 +447,14 @@
         
 
         const combatXpElem = tables[1];
-        combatXpElem.style.border = '1px solid lime';
+        //combatXpElem.style.border = '1px solid lime';
 
         let xpLeft = tables[1].querySelector('tbody > tr > td > div.levelio').getAttribute('title');
         xpLeft = xpLeft.replace('XP left: ', '');
         xpLeft = parseInt(xpLeft); 
 
         let progress = tables[1].querySelector('tbody > tr > td > div.levelio > div.levelio2').style.width;
-        log(`combat xp bar progress: ${progress}`)
+        //log(`combat xp bar progress: ${progress}`)
 
         const totalXp = calcTotalXp(combatLevel, xpLeft, 'Combat') 
 
@@ -466,7 +468,7 @@
             progress: progress
         }
 
-        log(`[data object] level: ${data.level}, xpLeft: ${data.xpLeft}, totalXp: ${data.totalXp}, progress: ${data.progress} %`);
+        //log(`[data object] level: ${data.level}, xpLeft: ${data.xpLeft}, totalXp: ${data.totalXp}, progress: ${data.progress} %`);
 
 
 
