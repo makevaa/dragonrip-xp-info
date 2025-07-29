@@ -18,11 +18,14 @@
     const settings = {
         compactBasicInfo:true, // Make basic character info elements compact by reducing size
         removeVanillaElements:true, // Remove game's vanilla skill info on character page
+        customPlayerInfo: true // Create custom player info box (name, clan, combat level etc.)
     }
     
     //        
 
     const mainCss = `
+
+       
 
         .dragonrip-xp-info-box {
             xborder:1px solid grey;
@@ -222,16 +225,20 @@
     `;
 
     const compactBasicInfoCss = `
+        body > .veik {
+            xdisplay:flex;
+        }
+
+        /* the br elements the game's designer has used in the layout */
+        body > .veik > br {
+            display: none !important;
+            visibility: hidden !important;
+        }
+
         body > .veik > *:nth-child(4) {
             xborder:1px solid lime;
         }
 
-        /* Character avatar on character page */
-        body > .veik > *:nth-child(4) > tbody > tr > td:nth-child(3) {
-            xborder:1px solid red;
-            width:50px!important;
-            height:50px!important;
-        }
     `;
 
     const removeVanillaElementsCss = `
@@ -244,6 +251,128 @@
         }
 
     `;
+
+    const customPlayerInfoCss = `
+        #custom-player-info {
+            border: 1px solid rgba(54, 54, 54, 1);
+            border-radius:5px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width:40%;
+            min-width:300px;
+            height:100px;
+            background-color: rgba(0, 0, 0, 0.3);
+            margin: 0px auto 5px auto;
+ 
+        }
+        
+        #custom-player-info > .avatar-cont {
+            overflow:hidden;
+            height:100%;
+            aspect-ratio:1/1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        
+     
+        }
+
+        #custom-player-info > .avatar-cont > .avatar {
+            xborder:1px solid grey;
+            width:80%;
+            height:80%;
+            background-size: cover;
+            background-repeat: no-repeat;
+            border: 4px ridge rgba(61, 61, 61, 1);
+            border-radius:5px;
+            background-color: rgba(22, 22, 22, 1);
+
+            box-shadow: inset 0px 0px 5px 5px rgba(0,0,0, 0.5), 5px 5px 5px rgba(0,0,0, 0.5);
+
+            /*
+            border-image-source: url('https://i.imgur.com/c7Oeu0F.png');
+            border-image-slice: 150;
+            border-image-width: 3em;
+            border-image-outset: 0;
+            border-image-repeat: round;
+           
+            */
+        }
+
+
+        #custom-player-info > .info {
+            display:flex;
+            flex-direction: column;
+            align-items:center;
+            justify-content:center;
+            height:100%;
+            xwidth:70%;
+            padding:5px;
+            filter: brightness(0.9);
+            xflex: 1;
+        }
+
+        #custom-player-info > .info > .item {
+            xborder:1px solid grey;
+            display:flex;
+            align-items: center;
+            justify-content: center;
+            width:100%;
+            padding:3px;
+        }   
+
+        #custom-player-info > .info > .name-cont {
+           xfont-family: Garamond;
+           xfont-size: 1.2em;
+           xfont-weight:bold;
+
+        } 
+        
+        #custom-player-info > .info > .name-cont > .title {
+           margin-right: 5px;
+        }  
+
+        #custom-player-info > .info > .clan{
+           font-style: italic;
+        }  
+
+        #custom-player-info > .info > .clan:hover{
+           filter: brightness(1.2);
+        }  
+
+        #custom-player-info > .info > .item.levels-cont {
+            xborder:1px solid grey;
+            display:flex;
+            align-items:center;
+            justify-content: center;
+            width:100%;
+       
+        }
+
+        #custom-player-info > .info > .item.levels-cont > .item {
+            xborder:1px solid grey;
+            display:flex;
+            align-items:center;
+            justify-content:center;
+        }
+
+        #custom-player-info > .info > .item.levels-cont > .item.combat-level {
+            margin-right:20px;
+        }
+
+        #custom-player-info > .info > .item.levels-cont > .item > .icon {
+            height: 25px;
+            aspect-ratio: 1/1;
+            xborder:1px solid red;
+            margin-right:10px;
+        }
+
+        #custom-player-info > .info > .item.levels-cont > .item > .num {
+            font-size: 1.3em;
+        }
+    
+    `
 
     // https://dragonrip.fandom.com/wiki/Experience
     // Level: Experience Required from Previous Level
@@ -519,6 +648,178 @@
 
         combatXpElem.remove();
     }
+
+    /* Read player name, title, clan etc. from vanilla game elements */
+    const getPlayerData = () => {
+        
+        // Basic info is the title, name, faction, clan and their applies styles (colors etc.) 
+        const playerBasicInfoElem = document.querySelector('  body > .veik > *:nth-child(2)')
+  
+        const playerBasicInfo = playerBasicInfoElem.childNodes;
+        //log(playerBasicInfo)
+        const playerTitle = playerBasicInfo[0].innerText;
+        const titleStyle = playerBasicInfo[0].getAttribute('style');
+        const playerName = playerBasicInfo[1].textContent.replace('"', '').trim();
+        const factionName = playerBasicInfo[3].innerText;
+        const factionStyle = playerBasicInfo[3].getAttribute('style');
+        const clanName = playerBasicInfo[5].querySelector('span > i').innerText;
+        const clanStyle = playerBasicInfo[5].querySelector('span').getAttribute('style');;
+        const clanUrl = playerBasicInfo[5].getAttribute('href');
+   
+        const playerCombatLevel = document.querySelector('  body > .veik > *:nth-child(4) > tbody > tr > *:nth-child(2) > span > b ').innerText;
+
+        const combatLevelStyle = document.querySelector('  body > .veik > *:nth-child(4) > tbody > tr > *:nth-child(2) > span').getAttribute('style');;
+
+        const playerAvatarUrl = document.querySelector('  body > .veik > *:nth-child(4) > tbody > tr > *:nth-child(3) > .gru > img ').getAttribute('src');
+
+        const playerAchiPoints = document.querySelector('  body > .veik > *:nth-child(4) > tbody > tr > *:nth-child(4) > span > b ').innerText;
+
+        const achiPointsStyle = document.querySelector('  body > .veik > *:nth-child(4) > tbody > tr > *:nth-child(4) > span').getAttribute('style');
+
+
+        const data = {
+            playerTitle: playerTitle,
+            titleStyle: titleStyle,
+            playerName: playerName,
+            factionName: factionName,
+            factionStyle: factionStyle,
+            clanName: clanName,
+            clanStyle: clanStyle,
+            clanUrl: clanUrl,
+            combatLevel: playerCombatLevel,
+            combatLevelStyle: combatLevelStyle,
+            avatarUrl: playerAvatarUrl,
+            achiPoints: playerAchiPoints,
+            achiPointsStyle: achiPointsStyle,
+        }
+
+        //log(data)
+        return data;
+    }
+
+    const createCustomPlayerInfoArea = () => {
+        const data = getPlayerData();
+        log(data)
+
+        const elem = document.createElement('div');
+        elem.id = 'custom-player-info';
+
+        // Player avatar
+        const avatarCont =  document.createElement('div');
+        avatarCont.classList.add('avatar-cont');
+
+        const avatar =  document.createElement('div');
+        avatar.classList.add('avatar');
+        //avatar.src = `${data.avatarUrl}`;
+        avatar.style.backgroundImage = `url(${data.avatarUrl})`;
+        avatarCont.append(avatar);
+
+        // Container for player info
+        const info =  document.createElement('div');
+        info.classList.add('info');
+
+        // Container for player title and name
+        const nameCont = document.createElement('div');
+        nameCont.classList.add('item');
+        nameCont.classList.add('name-cont');
+
+        // Player title
+        const title = document.createElement('div');
+        title.classList.add('title');
+        title.innerText = data.playerTitle;
+        title.style = data.titleStyle;
+        nameCont.append(title);
+
+        // Player name
+        const name = document.createElement('div');
+        name.classList.add('name');
+        name.innerText = data.playerName;
+        nameCont.append(name);
+        info.append(nameCont);
+
+
+        // Player faction
+        const faction = document.createElement('div');
+        faction.classList.add('item');
+        faction.classList.add('faction');
+        faction.innerText = data.factionName;
+        faction.style = data.factionStyle;
+        info.append(faction);
+
+        // Player clan
+        const clan = document.createElement('a');
+        clan.classList.add('item');
+        clan.classList.add('clan');
+        clan.innerText = data.clanName;
+        clan.style = data.clanStyle;
+        clan.setAttribute('href', data.clanUrl);
+        info.append(clan);
+
+
+        // Player combat level and achievement points row
+        const levelsCont = document.createElement('div');
+        levelsCont.classList.add('item');
+        levelsCont.classList.add('levels-cont');
+
+
+        // Container for combat icon and combat level
+        const combatLevelCont = document.createElement('div');
+        combatLevelCont.classList.add('item');
+        combatLevelCont.classList.add('combat-level');
+
+        // Combat icon
+        const combatIcon = document.createElement('img');
+        combatIcon.classList.add('icon');
+        combatIcon.src = '/game/images/icons/kova.png';
+        combatLevelCont.append(combatIcon);
+
+        // Combat level number
+        const combatLevel = document.createElement('div');
+        combatLevel.classList.add('num');
+        combatLevel.innerText = data.combatLevel;
+        combatLevel.style = data.combatLevelStyle;
+        combatLevelCont.append(combatLevel);
+
+        levelsCont.append(combatLevelCont);
+      
+
+        // Container for achievement icon and achievement points
+        const achiCont = document.createElement('div');
+        achiCont.classList.add('item');
+
+        // Achievement icon
+        const achiIcon = document.createElement('img');
+        achiIcon.classList.add('icon');
+        achiIcon.src = '/game/images/icons/achieve.png';
+        achiCont.append(achiIcon);
+ 
+        // Achievement point number
+        const achiPoints = document.createElement('div');
+        achiPoints.classList.add('num');
+        achiPoints.innerText = data.achiPoints;
+        achiPoints.style = data.achiPointsStyle;
+        achiCont.append(achiPoints);
+
+        levelsCont.append(achiCont);
+
+
+        info.append(levelsCont);
+
+        elem.append(avatarCont);
+        elem.append(info);
+
+        const target = document.querySelector('body > .veik');
+  
+
+        // Remove vanilla info elements
+        if (true) {
+            target.querySelector('*:nth-child(2)').remove();
+            target.querySelector('*:nth-child(3)').remove();
+        }
+
+        
+        target.prepend(elem);
+    }
     
 
     const setCustomCss = str => {
@@ -546,9 +847,15 @@
 
 
                     const skillElems = getSkillElems();
-
                     createElems(skillElems);
                     combatXpBar();
+
+                    if (settings.customPlayerInfo) {
+                        setCustomCss(customPlayerInfoCss);
+                        createCustomPlayerInfoArea();
+                    }
+
+                   
                 }
               
                
