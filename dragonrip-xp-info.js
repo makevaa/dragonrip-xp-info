@@ -15,6 +15,14 @@
     'use strict';
 
 
+    /*
+    2025-08-05: yomismon kanssa yölliset keskustelut discordissa:
+    eli xp hommeleissa on bugeja. Aikaisemmin ajattelin että eivoi olla lvl 0, mutta dragonripissä alitetaan levelistä 0.
+    Toinen juttu oli, että kuulemma wikissä (mistä otin datan) voi olla virheitä lvl 50 jälkeen. Ja jos on, niin kaikki loput levelit pilaantuu, virhe kaiketi kasaantuu. Tämä homma laitetaan muhittelemaan. Sitten kun ostetaan taas olutta niin päivitellään.
+
+
+    */
+
     const settings = {
         compactBasicInfo:true, // Make basic character info elements compact by reducing size
         removeVanillaElements:true, // Remove game's vanilla skill info on character page
@@ -24,7 +32,7 @@
     //        
 
     const mainCss = `
-
+ 
        
 
         .dragonrip-xp-info-box {
@@ -41,6 +49,7 @@
             --blue: #2259b7;
             --purple: #6f6fffff;
             --light-lime: #00ff80ff;
+
         }
 
         .dragonrip-xp-info-box > .row {
@@ -142,16 +151,21 @@
         }
    
         /* XP bar filled interior */
-        .dragonrip-xp-info-box > .xp-bar-cont > .bar-outer > .bar-inner,
+        .dragonrip-xp-info-box > .xp-bar-cont > .bar-outer > .bar-inner, 
         .dragonrip-combat-info-box > .xp-bar-cont > .bar-outer > .bar-inner {
             height:100%;
             position:relative;
-            text-align:left;
-            filter:saturate(2);
-            background-color: var(--blue)!important;
-            background-color: #2259b7!important;
+            xtext-align:left;
+            xfilter:saturate(2);
+            background-color: var(--blue);
+            xbackground-color: #2259b7 ;
         }
 
+        /* The big combat xp bar */
+        .dragonrip-combat-info-box > .xp-bar-cont > .bar-outer > .bar-inner {
+            background-color: rgba(63, 0, 165, 1);
+            background-color: #1a4185ff ;
+        }
 
 
         .dragonrip-xp-info-box > .xp-bar-cont > .bar-outer:after,
@@ -221,6 +235,8 @@
         .dragonrip-combat-info-box > .xp-info > .box > .num {
             xcolor: grey;
         }
+
+      
     }
     `;
 
@@ -257,13 +273,31 @@
             border: 1px solid rgba(54, 54, 54, 1);
             border-radius:5px;
             display: flex;
+            xflex-direction: column;
             align-items: center;
             justify-content: center;
-            width:40%;
+            width:95%;
             min-width:300px;
-            height:100px;
+            height:120px;
             background-color: rgba(0, 0, 0, 0.3);
             margin: 0px auto 5px auto;
+            font-family: consolas, monospace, Courier New;
+            padding: 5px 0px;
+            /* border simple https://i.imgur.com/c7Oeu0F.png'  */
+            /* border ornamental https://i.imgur.com/j7xNFLn.png  */
+            border-image-source: url('https://i.imgur.com/j7xNFLn.png');
+            border-image-slice: 150;
+            border-image-width: 3em;
+            border-image-outset: 0;
+            border-image-repeat: repeat;
+            box-shadow: 5px 5px 5px 0px rgba(0, 0, 0, 0.6), inset 0px 0px 10px 10px rgba(0, 0, 0, 0.8);
+
+            xborder-radius: 100px;
+
+            background-image: url('https://i.imgur.com/vjJ8ugC.jpeg');
+            background-size:contain;
+
+            xoutline: 5px solid grey;
  
         }
         
@@ -302,15 +336,22 @@
 
 
         #custom-player-info > .info {
+            xborder:1px solid grey;
             display:flex;
             flex-direction: column;
-            align-items:center;
-            justify-content:center;
+            align-items: center;
+            justify-content: center;
             height:100%;
             xwidth:70%;
             padding:5px;
             filter: brightness(0.9);
             xflex: 1;
+            text-shadow: 
+                0px 0px 10px rgba(0,0,0, 1.0),
+                0px 0px 10px rgba(0,0,0, 1.0),
+                0px 0px 10px rgba(0,0,0, 1.0),
+                0px 0px 10px rgba(0,0,0, 1.0),
+                0px 0px 10px rgba(0,0,0, 1.0) !important;
         }
 
         #custom-player-info > .info > .item {
@@ -320,6 +361,8 @@
             justify-content: center;
             width:100%;
             padding:3px;
+            height:25%;
+            xbackground-color: rgba(0,0,0, 0.5);
         }   
 
         #custom-player-info > .info > .name-cont {
@@ -331,9 +374,15 @@
         
         #custom-player-info > .info > .name-cont > .title {
            margin-right: 5px;
+           text-shadow: 
+                0px 0px 10px rgba(0,0,0, 1.0),
+                0px 0px 10px rgba(0,0,0, 1.0),
+                0px 0px 10px rgba(0,0,0, 1.0),
+                0px 0px 10px rgba(0,0,0, 1.0),
+                0px 0px 10px rgba(0,0,0, 1.0) !important;
         }  
 
-        #custom-player-info > .info > .clan{
+        #custom-player-info > .info > .clan {
            font-style: italic;
         }  
 
@@ -362,7 +411,7 @@
         }
 
         #custom-player-info > .info > .item.levels-cont > .item > .icon {
-            height: 25px;
+            height: 20px;
             aspect-ratio: 1/1;
             xborder:1px solid red;
             margin-right:10px;
@@ -468,16 +517,17 @@
         return elem;
     }
 
-    const calcTotalXp = (level, xpToLevel, skillName) => {
+
+    const calcTotalXp = (level, xpToLevel) => {
         let totalXp = 0;
         level = parseInt(level);
 
-        for (let i=0; i < level; i++) {
+        for (let i=0; i<level; i++) {
             totalXp += experiences[i]; 
         }
 
         // Calc the current level's xp gained
-        totalXp +=  experiences[level] - xpToLevel;
+        totalXp += experiences[level] - xpToLevel;
 
         if (totalXp < 0) {
             totalXp = 0;
@@ -486,6 +536,7 @@
         //log(`[${skillName}] level: ${level}, totalXp: ${totalXp}`)
         return totalXp;
     }
+
 
     const createElems = elems => {
         for (const skillElem of elems) {
