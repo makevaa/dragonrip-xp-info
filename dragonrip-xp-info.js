@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Dragonrip XP Info
 // @namespace    http://tampermonkey.net/
-// @version      1.0.11
+// @version      1.0.13
 // @description  View skill xp data on character page in Dragonrip
 // @author       paxu
 // @match         *://*.dragonrip.com/*
@@ -26,7 +26,8 @@
     const settings = {
         compactBasicInfo:true, // Make basic character info elements compact by reducing size
         removeVanillaElements:true, // Remove game's vanilla skill info on character page
-        customPlayerInfo: true // Create custom player info box (name, clan, combat level etc.)
+        customPlayerInfo: true, // Create custom player info box (name, clan, combat level etc.)
+        showPlayerId: true,
     }
     
     //        
@@ -342,10 +343,11 @@
             align-items: center;
             justify-content: center;
             height:100%;
-            xwidth:70%;
+            width:40%;
+            xflex: 1;
             padding:5px;
             filter: brightness(0.9);
-            xflex: 1;
+            
             text-shadow: 
                 0px 0px 10px rgba(0,0,0, 1.0),
                 0px 0px 10px rgba(0,0,0, 1.0),
@@ -420,6 +422,32 @@
         #custom-player-info > .info > .item.levels-cont > .item > .num {
             font-size: 1.3em;
         }
+
+        #copy-id-button {
+            border: 2px double grey;
+            border-radius: 5px;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 5px;
+            width: 20%;
+            height: 80%;
+            text-align: center;
+            justify-self: end;
+            background-color: rgba(0, 0, 0, 0.5);
+            color: grey;
+        }
+
+        #copy-id-button:hover {
+            background-color: rgba(0, 0, 0, 0.8);
+        }
+        
+        #copy-id-button:active {
+
+        }
+         
+          
     
     `
 
@@ -713,9 +741,21 @@
         const playerName = playerBasicInfo[1].textContent.replace('"', '').trim();
         const factionName = playerBasicInfo[3].innerText;
         const factionStyle = playerBasicInfo[3].getAttribute('style');
-        const clanName = playerBasicInfo[5].querySelector('span > i').innerText;
-        const clanStyle = playerBasicInfo[5].querySelector('span').getAttribute('style');;
-        const clanUrl = playerBasicInfo[5].getAttribute('href');
+
+        log(playerBasicInfo.length)
+
+        // If player is in clan, the playerBasicInfo length is longer
+        let clanName = '<player not in clan>';
+        let clanStyle = 'color:grey;';
+        let clanUrl = '';
+
+        if (playerBasicInfo.length > 4) {
+            clanName = playerBasicInfo[5].querySelector('span > i').innerText;
+            clanStyle = playerBasicInfo[5].querySelector('span').getAttribute('style');;
+            clanUrl = playerBasicInfo[5].getAttribute('href');
+        }
+
+
    
         const playerCombatLevel = document.querySelector('  body > .veik > *:nth-child(4) > tbody > tr > *:nth-child(2) > span > b ').innerText;
 
@@ -866,9 +906,30 @@
         if (true) {
             target.querySelector('*:nth-child(2)').remove();
             target.querySelector('*:nth-child(3)').remove();
-        }
+        } 
 
         
+   
+
+        // Create Player name / id box, for use in player-data.js for other projects
+        if (settings.showPlayerId) {
+            const url = document.location.href;
+            const playerId = url.replace('https://dragonrip.com/game/who.php?wr=', '')
+            const playerIdStr = `${data.playerName.trim()} | ${playerId.trim()}`;
+        
+            const copyIdButton = document.createElement('div');
+            copyIdButton.id = 'copy-id-button';
+            copyIdButton.innerText = 'Copy ID to clipboard';
+
+            copyIdButton.addEventListener("click", (e) => {
+                navigator.clipboard.writeText(playerIdStr);
+                copyIdButton.innerText = `copied ${playerIdStr}`;
+                copyIdButton.style.color = '#00cc00';
+            });
+
+            elem.append(copyIdButton);
+        }
+
         target.prepend(elem);
     }
     
