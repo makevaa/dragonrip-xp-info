@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Dragonrip XP Info
 // @namespace    http://tampermonkey.net/
-// @version      1.0.13
+// @version      1.0.14
 // @description  View skill xp data on character page in Dragonrip
 // @author       paxu
 // @match         *://*.dragonrip.com/*
@@ -17,10 +17,8 @@
 
     /*
     2025-08-05: yomismon kanssa yölliset keskustelut discordissa:
-    eli xp hommeleissa on bugeja. Aikaisemmin ajattelin että eivoi olla lvl 0, mutta dragonripissä alitetaan levelistä 0.
-    Toinen juttu oli, että kuulemma wikissä (mistä otin datan) voi olla virheitä lvl 50 jälkeen. Ja jos on, niin kaikki loput levelit pilaantuu, virhe kaiketi kasaantuu. Tämä homma laitetaan muhittelemaan. Sitten kun ostetaan taas olutta niin päivitellään.
-
-
+    eli xp hommeleissa on bugeja. Aikaisemmin ajattelin että eivoi olla lvl 0, mutta dragonripissä jotkut skillit alkaa levelistä 0, toiset levelistä 1.
+    Toinen juttu oli, että kuulemma wikissä (mistä otin datan) voi olla virheitä lvl 50 jälkeen. Ja jos on, niin kaikki loput levelit pilaantuu, virhe kaiketi kasaantuu. Tämä homma laitetaan muhittelemaan.
     */
 
     const settings = {
@@ -33,9 +31,6 @@
     //        
 
     const mainCss = `
- 
-       
-
         .dragonrip-xp-info-box {
             xborder:1px solid grey;
             width:100%;
@@ -457,7 +452,9 @@
 
 
 
-    const log = console.log;
+    const log = str => {
+        console.log(`[Dragonrip XP Info]: ${str}`);
+    }
 
     // Check if character page is open by inspecting the current url address
     const characterPageOpen = () => {
@@ -942,6 +939,13 @@
 
     // Wait for game UI to load, then insert elements
     const waitForUI = () => {
+
+        const currentUrl = document.location.href;
+        if (currentUrl.indexOf('https://dragonrip.com/game/who.php') === -1) {
+            log("not on character page, aborting...");
+            return;
+        }
+
         const checkElem = setInterval( () => {
             if (document.querySelector('ul.navbar') !== null) {
                 clearInterval(checkElem); 
