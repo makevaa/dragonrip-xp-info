@@ -482,7 +482,17 @@
         //each skill row has 3 skills
         const skillElems = [];
         //const skillElemRows = document.querySelectorAll('body > .veik > table:nth-child(6) > tbody > tr');
-        const tables = document.querySelectorAll('body > .veik > table#pirki');
+        const tableNodes = document.querySelectorAll('body > .veik > table#pirki');
+        const tables = Array.from(tableNodes);
+        log(tables)
+
+        // Check if Christmas event snowball "throw" and "hits" element row exists, remove from array if found
+        const firstRowSnowballElem = tables[0].querySelector('tbody > tr > td > div');
+        if (firstRowSnowballElem.classList.contains('juod')) {
+            log("snowball row found, removing from rows...");
+            tables.shift();
+        }
+
         const skillElemRows = tables[2].querySelectorAll('tbody > tr')
 
         //log(tables)
@@ -644,8 +654,16 @@
 
 
     const combatXpBar = () => {
-        const tables = document.querySelectorAll('body > .veik > table#pirki');
-        //log(tables)
+        const tableNodes = document.querySelectorAll('body > .veik > table#pirki');
+        const tables = Array.from(tableNodes);
+     
+        
+        // Check if Christmas event snowball "throw" and "hits" element row exists, remove from array if found
+        const firstRowSnowballElem = tables[0].querySelector('tbody > tr > td > div');
+        if (firstRowSnowballElem.classList.contains('juod')) {
+            log("snowball row found, removing from rows...");
+            tables.shift();
+        }
 
         // Get combat level from the element in the character page
         const combatLevel = parseInt(tables[0].querySelectorAll('tbody > tr > td')[1].querySelector('span > b').innerText);
