@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Dragonrip XP Info
 // @namespace    http://tampermonkey.net/
-// @version      1.0.14
+// @version      1.0.15
 // @description  View skill xp data on character page in Dragonrip
 // @author       paxu
 // @match         *://*.dragonrip.com/*
@@ -16,8 +16,8 @@
 
 
     /*
-    2025-08-05: yomismon kanssa yölliset keskustelut discordissa:
-    eli xp hommeleissa on bugeja. Aikaisemmin ajattelin että eivoi olla lvl 0, mutta dragonripissä jotkut skillit alkaa levelistä 0, toiset levelistä 1.
+    2025-08-05: yomismon kanssa keskustelut discordissa:
+    eli xp-hommeleissa on bugeja. Aikaisemmin ajattelin että ei voi olla lvl 0, mutta dragonripissä jotkut skillit alkaa levelistä 0, toiset levelistä 1.
     Toinen juttu oli, että kuulemma wikissä (mistä otin datan) voi olla virheitä lvl 50 jälkeen. Ja jos on, niin kaikki loput levelit pilaantuu, virhe kaiketi kasaantuu. Tämä homma laitetaan muhittelemaan.
     */
 
@@ -417,9 +417,9 @@
         #custom-player-info > .info > .item.levels-cont > .item > .num {
             font-size: 1.3em;
         }
-
-        #copy-id-button {
-            border: 2px double grey;
+    
+        #copy-player-id-button, #copy-clan-data-button {
+            border: 2px double grey !important;
             border-radius: 5px;
             cursor: pointer;
             display: inline-flex;
@@ -434,11 +434,15 @@
             color: grey;
         }
 
-        #copy-id-button:hover {
+        #copy-player-id-button {
+            
+        }
+
+        .copy-button:hover {
             background-color: rgba(0, 0, 0, 0.8);
         }
         
-        #copy-id-button:active {
+        .copy-button:active {
 
         }
          
@@ -803,6 +807,22 @@
         return data;
     }
 
+
+    // Read clan data from clan page
+    const getClanData = () => {
+        const box = document.querySelector('body > .veik > .riped');
+        const infoArr = box.innerText.split('\n');
+        const clanFaction = infoArr[0].trim(); 
+        const clanName = infoArr[1].trim();
+ 
+        const data = {
+            clanName: clanName,
+            clanFaction: clanFaction,
+        }
+
+        return data;
+    }
+
     const createCustomPlayerInfoArea = () => {
         const data = getPlayerData();
         log(data)
@@ -811,7 +831,7 @@
         elem.id = 'custom-player-info';
 
         // Player avatar
-        const avatarCont =  document.createElement('div');
+        const avatarCont = document.createElement('div');
         avatarCont.classList.add('avatar-cont');
 
         const avatar =  document.createElement('div');
@@ -916,15 +936,11 @@
 
         const target = document.querySelector('body > .veik');
   
-
         // Remove vanilla info elements
         if (true) {
             target.querySelector('*:nth-child(2)').remove();
             target.querySelector('*:nth-child(3)').remove();
         } 
-
-        
-   
 
         // Create Player name / id box, for use in player-data.js for other projects
         if (settings.showPlayerId) {
@@ -932,20 +948,54 @@
             const playerId = url.replace('https://dragonrip.com/game/who.php?wr=', '')
             const playerIdStr = `${data.playerName.trim()} | ${playerId.trim()}`;
         
-            const copyIdButton = document.createElement('div');
-            copyIdButton.id = 'copy-id-button';
-            copyIdButton.innerText = 'Copy ID to clipboard';
+            const copyPlayerIdButton = document.createElement('div');
+            copyPlayerIdButton.classList.add('copy-button');
+            copyPlayerIdButton.id = 'copy-player-id-button';
+            copyPlayerIdButton.innerText = 'Copy ID to clipboard';
 
-            copyIdButton.addEventListener("click", (e) => {
+            copyPlayerIdButton.addEventListener("click", (e) => {
                 navigator.clipboard.writeText(playerIdStr);
-                copyIdButton.innerText = `copied ${playerIdStr}`;
-                copyIdButton.style.color = '#00cc00';
+                copyPlayerIdButton.innerText = `copied ${playerIdStr}`;
+                copyPlayerIdButton.style.color = '#00cc00';
             });
 
-            elem.append(copyIdButton);
+            elem.append(copyPlayerIdButton);
+        }
+        target.prepend(elem);
+    }
+
+
+    // Create button to copy clan data on clan page, used in player-index project
+    const createCopyClanIdButton = () => {
+        log("on clan page");
+
+        const data =  getClanData();
+
+        const url = document.location.href;
+        const clanId = url.replace('https://dragonrip.com/game/clanm.php?wr=', '');
+
+        let factionIndex = 0;
+        if (data.clanFaction === "Legion of the Damned") {
+            factionIndex = 1;
         }
 
-        target.prepend(elem);
+        const clanIdStr = `${data.clanName.trim()} | ${clanId.trim()} | ${factionIndex}`;
+    
+        const copyClanDataButton = document.createElement('div');
+        copyClanDataButton.classList.add('copy-button');
+        copyClanDataButton.id = 'copy-clan-data-button';
+        copyClanDataButton.innerText = 'Copy data to clipboard';
+
+        copyClanDataButton.addEventListener("click", (e) => {
+            navigator.clipboard.writeText(clanIdStr);
+            copyClanDataButton.innerText = `copied ${clanIdStr}`;
+            copyClanDataButton.style.color = '#00cc00';
+        });
+
+        const target = document.querySelector('body > .veik > *:nth-child(2)');
+
+        target.append(copyClanDataButton);
+        
     }
     
 
@@ -961,6 +1011,11 @@
         const currentUrl = document.location.href;
         if (currentUrl.indexOf('https://dragonrip.com/game/who.php') === -1) {
             log("not on character page, aborting...");
+
+            if (currentUrl.indexOf('https://dragonrip.com/game/clanm.php?wr=') > -1) {
+                createCopyClanIdButton();
+            }
+
             return;
         }
 
