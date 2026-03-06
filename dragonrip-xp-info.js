@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Dragonrip XP Info
 // @namespace    http://tampermonkey.net/
-// @version      1.0.15
+// @version      1.0.16
 // @description  View skill xp data on character page in Dragonrip
 // @author       paxu
 // @match         *://*.dragonrip.com/*
@@ -761,6 +761,11 @@
         const factionName = playerBasicInfo[3].innerText;
         const factionStyle = playerBasicInfo[3].getAttribute('style');
 
+        let factionIndex = 0;
+        if (factionName == "Legion of the Damned") {
+            factionIndex = 1;
+        }
+
         log(playerBasicInfo.length)
 
         // If player is in clan, the playerBasicInfo length is longer
@@ -792,6 +797,7 @@
             titleStyle: titleStyle,
             playerName: playerName,
             factionName: factionName,
+            factionIndex: factionIndex,
             factionStyle: factionStyle,
             clanName: clanName,
             clanStyle: clanStyle,
@@ -945,8 +951,9 @@
         // Create Player name / id box, for use in player-data.js for other projects
         if (settings.showPlayerId) {
             const url = document.location.href;
-            const playerId = url.replace('https://dragonrip.com/game/who.php?wr=', '')
-            const playerIdStr = `${data.playerName.trim()} | ${playerId.trim()}`;
+            const playerId = url.replace('https://dragonrip.com/game/who.php?wr=', '');
+
+            const playerIdStr = `${data.playerName.trim()} | ${playerId.trim()} | ${data.factionIndex}`;
         
             const copyPlayerIdButton = document.createElement('div');
             copyPlayerIdButton.classList.add('copy-button');
@@ -957,6 +964,7 @@
                 navigator.clipboard.writeText(playerIdStr);
                 copyPlayerIdButton.innerText = `copied ${playerIdStr}`;
                 copyPlayerIdButton.style.color = '#00cc00';
+                console.log();
             });
 
             elem.append(copyPlayerIdButton);
